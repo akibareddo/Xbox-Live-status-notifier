@@ -11,8 +11,8 @@ def activetestpos():
     print "This will show up if everything is wrong."
  
     def email():
-            gmail_user = "INSERT BOT EMAIL HERE"
-            gmail_pwd = "INSERT BOT PASSWORD HERE"
+            gmailuser = "INSERT BOT EMAIL HERE"
+            gmailpwd = "INSERT BOT PASSWORD HERE"
             FROM = "Whoever you want here"
             TO = "Email group here (for multiple emails separate via comma and follow instructions below)"
             SUBJECT = "Xbox Live is experiencing problems."
@@ -27,7 +27,7 @@ def activetestpos():
                 server = smtplib.SMTP("smtp.gmail.com", 587)
                 server.ehlo()
                 server.starttls()
-                server.login(gmail_user, gmail_pwd)
+                server.login(gmailuser, gmailpwd)
                 server.sendmail(FROM, TO, message)
                 server.close()
                 print 'Successfully sent alert email, waiting 30 minutes before polling again.'
