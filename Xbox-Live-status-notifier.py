@@ -7,12 +7,12 @@ import time
 ##Functions that decide what happens when things are working and when things aren't.
 ##activetestpos() is called when there is a confirmed outage. The system will not alert again for half an hour by default.
 ##activetestneg() is called when there is no outage. You will see "This will show up if everything is right" every 30 seconds.
-def activetestpos():
+def ActivePos():
     print "This will show up if everything is wrong."
  
     def email():
-            gmailuser = "INSERT BOT EMAIL HERE"
-            gmailpwd = "INSERT BOT PASSWORD HERE"
+            GmailUser = "INSERT BOT EMAIL HERE"
+            GmailPwd = "INSERT BOT PASSWORD HERE"
             FROM = "Whoever you want here"
             TO = "Email group here (for multiple emails separate via comma and follow instructions below)"
             SUBJECT = "Xbox Live is experiencing problems."
@@ -27,7 +27,7 @@ def activetestpos():
                 server = smtplib.SMTP("smtp.gmail.com", 587)
                 server.ehlo()
                 server.starttls()
-                server.login(gmailuser, gmailpwd)
+                server.login(GmailUser, GmailPwd)
                 server.sendmail(FROM, TO, message)
                 server.close()
                 print 'Successfully sent alert email, waiting 30 minutes before polling again.'
@@ -36,29 +36,25 @@ def activetestpos():
     email()
     #Adjust time.sleep() according to how often you want emails
     time.sleep(1800)
-    a=1
            
  
-def activetestneg():
+def ActiveNeg():
     print "This will show up if everything is alright."
     #Adjust time.sleep() for how often you want the website to be polled
     time.sleep(30)
-    a = 1
+   
  
-a = 1
 x = str('[<div class="statusText">' '\\n' '<span class="">Xbox Live service is active.</span>' '\\n' '<span>See details &gt;</span>' '\\n' '</div>]')
-r = urllib2.urlopen("http://support.xbox.com/en-US/xbox-live-status").read()
- 
-while a == 1:
+while 1:
     #This is the beginning of the log parsing.
     #Beautiful Soup analyzes the web page and parses out anything with <div> and matches "statusText".
     #Luckily for us, there is only one of those on the page.
+    r = urllib2.urlopen("http://support.xbox.com/en-US/xbox-live-status").read()
     soup = BeautifulSoup(r)
     active = str(soup.find_all("div", class_='statusText'))
     #Testing active against x (doesn't match "Xbox Live service is active" exactly) will process functions accordingly
     if active == x:
-        activetestneg()
+        ActiveNeg()
     if active != x:
-        activetestpos()
+        ActivePos()
     ##To continue the script running forever and ever and ever
-    a = 1
