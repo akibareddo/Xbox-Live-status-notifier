@@ -5,8 +5,8 @@ import smtplib
 import time
  
 ##Functions that decide what happens when things are working and when things aren't.
-##activetestpos() is called when there is a confirmed outage. The system will not alert again for half an hour by default.
-##activetestneg() is called when there is no outage. You will see "This will show up if everything is right" every 30 seconds.
+##ActivePos() is called when there is a confirmed outage. The system will not alert again for half an hour by default.
+##ActiveNeg() is called when there is no outage. You will see "This will show up if everything is right" every 30 seconds.
 def ActivePos():
     print "This will show up if everything is wrong."
  
@@ -21,8 +21,10 @@ def ActivePos():
             #Prepare actual message
             message = """\From: %s\nTo: %s\nSubject: %s\n\n%s
             """ % (FROM, "".join(TO), SUBJECT, TEXT)
-            #If you are including multiple emails, use this line instead of the above:
-            #""" % (FROM, ", ".join(TO), SUBJECT, TEXT)
+            #If you are including multiple emails, comment out the line above and uncomment line 27.
+            #Separate the emails like this: "CIA@blah.com", "Bane@blah.com", "DoctorPavel@blah.com"
+            #You can also use SMS here, though you probably knew that:
+            #""" % (FROM, ",".join(TO), SUBJECT, TEXT)
             try:
                 server = smtplib.SMTP("smtp.gmail.com", 587)
                 server.ehlo()
@@ -57,4 +59,3 @@ while 1:
         ActiveNeg()
     if active != x:
         ActivePos()
-    ##To continue the script running forever and ever and ever
