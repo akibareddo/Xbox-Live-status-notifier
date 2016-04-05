@@ -3,59 +3,111 @@ from email.mime.text import MIMEText
 import urllib2
 import smtplib
 import time
- 
-##Functions that decide what happens when things are working and when things aren't.
-##ActivePos() is called when there is a confirmed outage. The system will not alert again for half an hour by default.
-##ActiveNeg() is called when there is no outage. You will see "This will show up if everything is right" every 30 seconds.
-def ActivePos():
-    print "This will show up if everything is wrong."
- 
-    def email():
-            GmailUser = "INSERT BOT EMAIL HERE"
-            GmailPwd = "INSERT BOT PASSWORD HERE"
-            FROM = "Whoever you want here"
-            TO = "Email group here (for multiple emails separate via comma and follow instructions below)"
-            SUBJECT = "Xbox Live is experiencing problems."
-            TEXT = "If you are seeing this, Xbox Live is currently experiencing problems.\nThis can be for any number of reasons, please review for more info \n http://support.xbox.com/en-US/xbox-live-status\nAlert emails will be suppressed for 30 minutes following this one."
- 
-            #Prepare actual message
-            message = """\From: %s\nTo: %s\nSubject: %s\n\n%s
-            """ % (FROM, "".join(TO), SUBJECT, TEXT)
-            #If you are including multiple emails, comment out the line above and uncomment line 27.
-            #Separate the emails like this: "CIA@blah.com", "Bane@blah.com", "DoctorPavel@blah.com"
-            #You can also use SMS here, though you probably knew that:
-            #""" % (FROM, ",".join(TO), SUBJECT, TEXT)
-            try:
-                server = smtplib.SMTP("smtp.gmail.com", 587)
-                server.ehlo()
-                server.starttls()
-                server.login(GmailUser, GmailPwd)
-                server.sendmail(FROM, TO, message)
-                server.close()
-                print 'Successfully sent alert email, waiting 30 minutes before polling again.'
-            except:
-                print "Failed to send email"
-    email()
-    #Adjust time.sleep() according to how often you want emails
-    time.sleep(1800)
-           
- 
-def ActiveNeg():
-    print "This will show up if everything is alright."
-    #Adjust time.sleep() for how often you want the website to be polled
-    time.sleep(30)
-   
- 
-x = str('[<div class="statusText">' '\\n' '<span class="">Xbox Live service is active.</span>' '\\n' '<span>See details &gt;</span>' '\\n' '</div>]')
-while 1:
-    #This is the beginning of the log parsing.
-    #Beautiful Soup analyzes the web page and parses out anything with <div> and matches "statusText".
-    #Luckily for us, there is only one of those on the page.
-    r = urllib2.urlopen("http://support.xbox.com/en-US/xbox-live-status").read()
-    soup = BeautifulSoup(r)
-    active = str(soup.find_all("div", class_='statusText'))
-    #Testing active against x (doesn't match "Xbox Live service is active" exactly) will process functions accordingly
-    if active == x:
-        ActiveNeg()
+import sys
+
+def emailstart():
+    gmail_user = "BOTEMAIL@gmail.com"
+    gmail_pwd = "SUPER SECRET PASSWORD"
+    FROM = "THE COOLEST BOT EVER"
+    #Change the TO line to the emails you want alerts sent to,
+    #Separated by a comma ONLY.
+    TO = "Bane@TDKR.com","CIA@TDKR.com","DrPavel@TDKR.com"
+    SUBJECT = "Xbox Live services are limited as of " + currenttime
+    TEXT = "As of " + currenttime + ", Xbox Live is currently experiencing problems affecting " + f + "." + "\nThis can be for any number of reasons, please review for more info \n http://support.xbox.com/en-US/xbox-live-status"
+
+    #Prepare actual message
+    message = """\From: %s\nTo: %s\nSubject: %s\n\n%s
+    """ % (FROM, "".join(TO), SUBJECT, TEXT)
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.ehlo()
+        server.starttls()
+        server.login(gmail_user, gmail_pwd)
+        server.sendmail(FROM, TO, message)
+        server.close()
+        print 'Successfully sent email for beginning of outage at ' + currenttime
+    except:
+        print 'Failed to send email for beginning of outage at ' + currenttime
+
+def emailend():
+#Just did it again for posterity, not really necessary
+    gmail_user = "BOTEMAIL@gmail.com"
+    gmail_pwd = "SUPER SECRET PASSWORD"
+    FROM = "THE COOLEST BOT EVER"
+    #Change the TO line to the emails you want alerts sent to,
+    #Separated by a comma ONLY.
+    TO = "Bane@TDKR.com","CIA@TDKR.com","DrPavel@TDKR.com"
+    TEXT = "Xbox Live has now resumed its normal status as of " + currenttime + ". Total downtime is " + elapsedtext + " hours."
+
+    #Prepare actual message
+    message = """\From: %s\nTo: %s\nSubject: %s\n\n%s
+    """ % (FROM, "".join(TO), SUBJECT, TEXT)
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.ehlo()
+        server.starttls()
+        server.login(gmail_user, gmail_pwd)
+        server.sendmail(FROM, TO, message)
+        server.close()
+        print 'Successfully sent email for end of outage at ' + currenttime
+    except:
+        print 'Failed to send email at ' + currenttime
+
+#This happens if stuff is bad.
+def activetestbad():
+    global meowtest
+    if meowtest == True:
+       email1()
+       meowtest = False
     if active != x:
-        ActivePos()
+        print "Holy meow everything's broken\r",
+       #This bot is a cat, did I forget to mention that? I love you Miss Fortune
+        time.sleep(5)
+
+#This happens if stuff is good.    
+def activetestok():
+    global meowtest
+    if meowtest == False:
+        email2()
+        meowtest = True
+        print "Normality has mew-sumed, meow\r"
+    else:
+        print "Everything's just purrfect :3\r",
+        time.sleep(5)
+
+#These lines are used as variables. Meowcount is used
+#since it's a global variable with a very unique name 
+#(it has to be global for the script to work)
+meowtest = True
+x = str('<h3 class="servicename m-t-n ">Xbox Live Core Services</h3>')
+
+while 1:
+    #This is where the magic happens. We get the input from
+    #the website, which we then analyze and test.
+    currenttime = time.strftime("%c")
+    starttime = time.time()
+    try:
+        r = urllib2.urlopen("http://support.xbox.com/en-US/xbox-live-status").read()
+    except urllib2.URLError:
+        print "Unable to reach website. http://support.xbox.com/en-US/xbox-live-status may not be up, or there may be a problem with the script."
+        time.sleep(20)
+        sys.exit()
+    soup = BeautifulSoup(r)
+    print "Analyzing...Beep boop meow...\r",
+    time.sleep(5)
+    endtime = time.time()
+    elapsed = (endtime - starttime)/3600
+    elapsedtext = "%.10f" % elapsed
+    active = str(soup.find("h3", class_="servicename m-t-n "))
+    if active == x:
+        activetestok()
+    else:
+        errordesc = str(soup.find("div", class_="content xl-col-14-24 xl-col-24-offset-5 xl-right-offset l-col-13-24 l-col-24-offset-5 m-col-16-24 m-col-24-offset-6 s-col-21-24 xs-col-21-24 p-l-md l-right-offset"))
+        try:
+            p_tag = str(soup.p.extract())
+        except (NameError, TypeError, AttributeError):
+            print "Something went wrong with analyzing the output."
+            time.sleep(20)
+            sys.exit
+        f = p_tag[23:-4]
+        activetestbad()
