@@ -5,14 +5,14 @@ import smtplib
 import time
 import sys
 
-def emailstart():
-    gmail_user = "BOTEMAIL@gmail.com"
-    gmail_pwd = "SUPER SECRET PASSWORD"
-    FROM = "THE COOLEST BOT EVER"
+def email1():
+    gmail_user = "USER"
+    gmail_pwd = "PASS"
+    FROM = "EMAIL"
     #Change the TO line to the emails you want alerts sent to,
-    #Separated by a comma ONLY.
-    TO = "Bane@TDKR.com","CIA@TDKR.com","DrPavel@TDKR.com"
-    SUBJECT = "Xbox Live services are limited as of " + currenttime
+    #Separated by a comma ONLY. THIS MEANS YOU MATT.
+    TO = "INSERT EMAILS HERE"
+    SUBJECT = "Xbox Live services are experiencing issues."
     TEXT = "As of " + currenttime + ", Xbox Live is currently experiencing problems affecting " + f + "." + "\nThis can be for any number of reasons, please review for more info \n http://support.xbox.com/en-US/xbox-live-status"
 
     #Prepare actual message
@@ -25,18 +25,19 @@ def emailstart():
         server.login(gmail_user, gmail_pwd)
         server.sendmail(FROM, TO, message)
         server.close()
-        print 'Successfully sent email for beginning of outage at ' + currenttime
+        print 'Successfully sent the email.'
     except:
-        print 'Failed to send email for beginning of outage at ' + currenttime
+        print "Failed to send email."
 
-def emailend():
-#Just did it again for posterity, not really necessary
-    gmail_user = "BOTEMAIL@gmail.com"
-    gmail_pwd = "SUPER SECRET PASSWORD"
-    FROM = "THE COOLEST BOT EVER"
+
+def email2():
+    gmail_user = "USER"
+    gmail_pwd = "PASS"
+    FROM = "EMAIL"
     #Change the TO line to the emails you want alerts sent to,
-    #Separated by a comma ONLY.
-    TO = "Bane@TDKR.com","CIA@TDKR.com","DrPavel@TDKR.com"
+    #Separated by a comma ONLY. THIS MEANS YOU MATT.
+    TO = "ENTER EMAILS HERE"
+    SUBJECT = "Xbox Live services are back up."
     TEXT = "Xbox Live has now resumed its normal status as of " + currenttime + ". Total downtime is " + elapsedtext + " hours."
 
     #Prepare actual message
@@ -49,19 +50,18 @@ def emailend():
         server.login(gmail_user, gmail_pwd)
         server.sendmail(FROM, TO, message)
         server.close()
-        print 'Successfully sent email for end of outage at ' + currenttime
+        print 'Successfully sent the email.'
     except:
-        print 'Failed to send email at ' + currenttime
+        print "Failed to send email."
 
 #This happens if stuff is bad.
 def activetestbad():
     global meowtest
     if meowtest == True:
-       email1()
-       meowtest = False
+        email1()
+        meowtest = False
     if active != x:
         print "Holy meow everything's broken\r",
-       #This bot is a cat, did I forget to mention that? I love you Miss Fortune
         time.sleep(5)
 
 #This happens if stuff is good.    
@@ -79,26 +79,28 @@ def activetestok():
 #since it's a global variable with a very unique name 
 #(it has to be global for the script to work)
 meowtest = True
-x = str('<h3 class="servicename m-t-n ">Xbox Live Core Services</h3>')
+x = str('<img alt="" aria-label="" class="p-b-md p-r-md" src="/Content/Images/LiveStatus/active_icon.png" title=""/>')
 
 while 1:
     #This is where the magic happens. We get the input from
     #the website, which we then analyze and test.
     currenttime = time.strftime("%c")
     starttime = time.time()
+    opener = urllib2.build_opener()
+    opener.addheaders = [('User-agent', 'Mozilla/5.0')]
     try:
-        r = urllib2.urlopen("http://support.xbox.com/en-US/xbox-live-status").read()
+        r = opener.open("http://support.xbox.com/en-US/xbox-live-status").read()
     except urllib2.URLError:
-        print "Unable to reach website. http://support.xbox.com/en-US/xbox-live-status may not be up, or there may be a problem with the script."
+        print "Unable to reach website. https://support.xbox.com/en-US/xbox-live-status may not be up, or there may be a problem with the script."
         time.sleep(20)
         sys.exit()
     soup = BeautifulSoup(r)
-    print "Analyzing...Beep boop meow...\r",
-    time.sleep(5)
     endtime = time.time()
     elapsed = (endtime - starttime)/3600
-    elapsedtext = "%.10f" % elapsed
-    active = str(soup.find("h3", class_="servicename m-t-n "))
+    elapsedtext = "%.3f" % elapsed
+    active = str(soup.find("img", class_="p-b-md p-r-md"))
+    print "Analyzing...Beep boop meow...\r",
+    time.sleep(5)
     if active == x:
         activetestok()
     else:
@@ -106,8 +108,9 @@ while 1:
         try:
             p_tag = str(soup.p.extract())
         except (NameError, TypeError, AttributeError):
-            print "Something went wrong with analyzing the output."
+            print "Something went wrong with analyzing the output"
             time.sleep(20)
             sys.exit
         f = p_tag[23:-4]
-        activetestbad()
+        if  'span' not in f:
+            activetestbad()
